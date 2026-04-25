@@ -1,5 +1,4 @@
 -- main.lua
--- GitHub deponun Raw bağlantısını buraya gireceğiz (Sen repo açınca güncelleriz)
 local GitHubRawURL = "https://raw.githubusercontent.com/aras737/CustomSaveInstance/main/"
 
 local function LoadModule(moduleName)
@@ -10,14 +9,21 @@ local function LoadModule(moduleName)
     if success then return result else warn("Modül yüklenemedi: " .. moduleName) end
 end
 
-print("==== Kendi SaveInstance'ımız Başlıyor ====")
+print("==== Aras SaveInstance Başlıyor ====")
 
--- 1. Aşama: Map'i tam yükle
+-- 1. Haritayı Yükle (Eksik çıkmasını önlemek için)
 local Bypass = LoadModule("StreamingBypass")
-if Bypass then
-    Bypass.LoadMap()
+if Bypass then Bypass.LoadMap() end
+
+-- 2. Objeleri Tara
+local Scanner = LoadModule("Scanner")
+local objList = {}
+if Scanner then objList = Scanner.GetInstances() end
+
+-- 3. Dosyaya Kaydet
+local Serializer = LoadModule("Serializer")
+if Serializer and #objList > 0 then 
+    Serializer.SaveToJSON(objList) 
 end
 
--- (Daha sonra buraya Scanner ve Serializer ekleyeceğiz)
-
-print("==== İşlem Hazır ====")
+print("==== İşlem Bitti ====")
