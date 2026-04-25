@@ -1,110 +1,98 @@
--- ARAS V4: FULL VERIFICATION & DETAILED TRACKER
-local repo = "https://raw.githubusercontent.com/aras737/CustomSaveInstance/main/"
+-- ARAS V5: DEX STYLE EXPLORER & FULL ENGINE
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- [DETAYLI PANEL - HER ŞEY BURADA]
+-- [DEX STYLE PANEL - HER DETAYI GÖSTERİR]
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 400, 0, 300)
-MainFrame.Position = UDim2.new(0.5, -200, 0.2, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+MainFrame.Size = UDim2.new(0, 420, 0, 320)
+MainFrame.Position = UDim2.new(0.5, -210, 0.2, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+MainFrame.Active = true
+MainFrame.Draggable = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 local Stroke = Instance.new("UIStroke", MainFrame)
 Stroke.Color = Color3.fromRGB(0, 170, 255)
 Stroke.Thickness = 2
 
-local function createL(txt, pos, clr, sz)
+local function addLabel(txt, y, clr, sz)
     local l = Instance.new("TextLabel", MainFrame)
-    l.Position = pos
-    l.Size = UDim2.new(1, -20, 0, 25)
+    l.Position = UDim2.new(0, 15, 0, y)
+    l.Size = UDim2.new(1, -30, 0, 25)
     l.Text = txt
     l.TextColor3 = clr or Color3.new(1,1,1)
     l.TextSize = sz or 14
     l.BackgroundTransparency = 1
     l.TextXAlignment = Enum.TextXAlignment.Left
-    l.Font = Enum.Font.Gotham
+    l.Font = Enum.Font.Code -- Yazılımcı tipi, Dex gibi görünür
     return l
 end
 
-local Title = createL("ARAS V4 - FULL MAP SAVER", UDim2.new(0, 10, 0, 10), Color3.fromRGB(0, 170, 255), 18)
-local Status = createL("Durum: Başlatılıyor...", UDim2.new(0, 10, 0, 45), Color3.new(1, 1, 0))
-local ScanStatus = createL("Tarama: Bekliyor...", UDim2.new(0, 10, 0, 75))
-local CurrentObj = createL("Kopyalanan: ---", UDim2.new(0, 10, 0, 105), Color3.new(0.7, 0.7, 0.7), 12)
-local TotalObj = createL("Toplam Obje: 0", UDim2.new(0, 10, 0, 135), Color3.new(0, 1, 0))
-local ServiceLabel = createL("Aktif Servis: ---", UDim2.new(0, 10, 0, 165), Color3.fromRGB(255, 100, 0))
+addLabel("ARAS EXPLORER V5 - KOPYALAMA ÜSSÜ", 10, Color3.fromRGB(0, 170, 255), 16)
+local Status = addLabel("DURUM: Hazırlanıyor...", 45, Color3.new(1, 1, 0))
+local CurrentPath = addLabel("YOL: ---", 75, Color3.new(0.8, 0.8, 0.8), 12)
+local CurrentObj = addLabel("OBJE: ---", 100, Color3.new(1, 1, 1), 12)
+local Counter = addLabel("TOPLAM VERİ: 0", 130, Color3.new(0, 1, 0))
+local ServiceProgress = addLabel("AKTİF SERVİS: Bekleniyor...", 160, Color3.fromRGB(255, 100, 0))
 
--- İlerleme Çubuğu
+-- İlerleme Barı
 local Bar = Instance.new("Frame", MainFrame)
-Bar.Position = UDim2.new(0, 10, 0, 210)
-Bar.Size = UDim2.new(1, -20, 0, 15)
+Bar.Position = UDim2.new(0, 15, 0, 200)
+Bar.Size = UDim2.new(1, -30, 0, 10)
 Bar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 local Fill = Instance.new("Frame", Bar)
 Fill.Size = UDim2.new(0, 0, 1, 0)
 Fill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 
--- [ANA SÜREÇ]
+-- [KUSURSUZ KOPYALAMA MOTORU]
 task.spawn(function()
-    Status.Text = "Durum: Karakter Sabitleniyor..."
+    Status.Text = "DURUM: Karakter Gökyüzüne Sabitlendi"
     local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
     local hrp = char:WaitForChild("HumanoidRootPart")
-    hrp.Anchored = true -- Kesinlikle düşmezsin
+    hrp.Anchored = true
+    hrp.CFrame = CFrame.new(0, 2000, 0) -- Çok yukarısı, güvenli bölge
 
-    -- 1. ADIM: DERİN TARAMA (DEEP SCAN)
-    Status.Text = "Durum: Derin Harita Taraması Başladı..."
-    local range = 5000
-    local step = 500
-    local totalPoints = ((range*2)/step)^2
-    local currentPoint = 0
-
-    for x = -range, range, step do
-        for z = -range, range, step do
-            currentPoint = currentPoint + 1
-            ScanStatus.Text = string.format("Tarama: %d / %d Nokta Yüklendi", currentPoint, 64) -- Örnek sabit değer
-            hrp.CFrame = CFrame.new(x, 1000, z)
-            LocalPlayer:RequestStreamAroundAsync(Vector3.new(x, 0, z))
-            task.wait(0.15) -- Oyunun objeleri indirmesi için süre tanı
-        end
-    end
-
-    Status.Text = "Durum: Veriler Doğrulanıyor..."
-    task.wait(2) -- Son bir bekleme
-
-    -- 2. ADIM: KOPYALAMA MOTORU
-    Status.Text = "Durum: RBXL OLUŞTURULUYOR..."
-    local ssi_url = "https://raw.githubusercontent.com/luau/SynSaveInstance/main/saveinstance.luau"
-    local synsaveinstance = loadstring(game:HttpGet(ssi_url, true))()
+    Status.Text = "DURUM: Motor ve Dex Verileri Yükleniyor..."
+    local synsaveinstance = loadstring(game:HttpGet("https://raw.githubusercontent.com/luau/SynSaveInstance/main/saveinstance.luau", true))()
 
     local Options = {
         Mode = "full",
-        FilePath = "Aras_Perfect_Copy.rbxl",
-        Decompile = false,
+        FilePath = "Aras_Full_Dex_Copy.rbxl",
+        NilInstances = true, -- Gizli objeleri al
+        SaveTerrain = true,  -- Yer şekillerini al
+        Decompile = false,   -- Hız için kapalı
+        IgnoreSlowInstances = false,
         Callback = function(data)
-            local count = data.Count or 0
-            local progress = data.Progress or 0
             local inst = data.Instance
-            
-            TotalObj.Text = "Toplam Obje: " .. count
-            Fill.Size = UDim2.new(progress / 100, 0, 1, 0)
-            
             if inst then
-                CurrentObj.Text = "Kopyalanan: " .. inst.Name
-                local s = inst:FindFirstAncestorOfClass("DataModel") or inst.Parent
-                ServiceLabel.Text = "Aktif Servis: " .. tostring(s)
+                -- Dex gibi tam yolu göster (Game.Workspace.Part gibi)
+                CurrentPath.Text = "YOL: game." .. inst:GetFullName()
+                CurrentObj.Text = "OBJE: " .. inst.Name .. " (" .. inst.ClassName .. ")"
+                
+                -- Hangi ana serviste olduğumuzu anla
+                local root = inst:FindFirstAncestorOfClass("DataModel") or inst.Parent
+                ServiceProgress.Text = "AKTİF SERVİS: " .. tostring(root)
             end
+            
+            Counter.Text = "TOPLAM VERİ: " .. (data.Count or 0)
+            Fill.Size = UDim2.new((data.Progress or 0) / 100, 0, 1, 0)
         end
     }
+
+    Status.Text = "DURUM: KOPYALAMA BAŞLADI (Sistem Zorlanıyor)"
+    Status.TextColor3 = Color3.new(0, 1, 0)
 
     local success, err = pcall(function()
         synsaveinstance(Options)
     end)
 
-    hrp.Anchored = false -- İşlem bitti, serbestsin
     if success then
         Status.Text = "DURUM: TAMAMLANDI! ✅"
-        Status.TextColor3 = Color3.new(0, 1, 0)
+        CurrentPath.Text = "Dosya: Delta/workspace/Aras_Full_Dex_Copy.rbxl"
     else
         Status.Text = "HATA: " .. tostring(err)
-        Status.TextColor3 = Color3.new(1, 0, 0)
+        warn("Kritik Hata: " .. err)
     end
+    
+    hrp.Anchored = false
 end)
