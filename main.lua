@@ -1,6 +1,6 @@
 -- main.lua
 -- GitHub deponun Raw bağlantısını buraya gireceğiz (Sen repo açınca güncelleriz)
-local GitHubRawURL = "https://raw.githubusercontent.com/SENIN_KULLANICI_ADIN/CustomSaveInstance/main/"
+local GitHubRawURL = "https://raw.githubusercontent.com/aras737/CustomSaveInstance/main/"
 
 local function LoadModule(moduleName)
     local url = GitHubRawURL .. "modules/" .. moduleName .. ".lua"
