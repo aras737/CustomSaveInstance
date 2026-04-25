@@ -1,118 +1,113 @@
--- ARAS V2: FULL VISUAL & LIVE TRACKER
+-- ARAS V3: GOD MODE & DETAILED PANEL
 local repo = "https://raw.githubusercontent.com/aras737/CustomSaveInstance/main/"
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- [GELİŞMİŞ GÖRSEL PANEL]
+-- [DETAYLI PANEL TASARIMI]
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 350, 0, 220)
-MainFrame.Position = UDim2.new(0.5, -175, 0.2, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+MainFrame.Size = UDim2.new(0, 380, 0, 260)
+MainFrame.Position = UDim2.new(0.5, -190, 0.2, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
 MainFrame.BorderSizePixel = 0
-local corner = Instance.new("UICorner", MainFrame)
+MainFrame.Active = true
+MainFrame.Draggable = true
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 15)
+local Stroke = Instance.new("UIStroke", MainFrame)
+Stroke.Color = Color3.fromRGB(0, 170, 255)
+Stroke.Thickness = 2
 
-local Title = Instance.new("TextLabel", MainFrame)
-Title.Size = UDim2.new(1, 0, 0, 35)
-Title.Text = "ARAS KOPYALAMA MERKEZİ"
-Title.TextColor3 = Color3.fromRGB(0, 200, 255)
-Title.TextSize = 18
-Title.Font = Enum.Font.GothamBold
-Title.BackgroundTransparency = 1
+local function createLabel(text, pos, color, size)
+    local l = Instance.new("TextLabel", MainFrame)
+    l.Position = pos
+    l.Size = UDim2.new(1, -20, 0, 25)
+    l.Text = text
+    l.TextColor3 = color or Color3.new(1,1,1)
+    l.TextSize = size or 14
+    l.BackgroundTransparency = 1
+    l.TextXAlignment = Enum.TextXAlignment.Left
+    l.Font = Enum.Font.GothamSemibold
+    return l
+end
 
-local StatusLabel = Instance.new("TextLabel", MainFrame)
-StatusLabel.Position = UDim2.new(0, 10, 0, 40)
-StatusLabel.Size = UDim2.new(1, -20, 0, 25)
-StatusLabel.Text = "Durum: Başlatılıyor..."
-StatusLabel.TextColor3 = Color3.new(1, 1, 1)
-StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
-StatusLabel.BackgroundTransparency = 1
+local Title = createLabel("ARAS V3 - KONTROL MERKEZİ", UDim2.new(0, 10, 0, 10), Color3.fromRGB(0, 170, 255), 18)
+local Status = createLabel("Durum: Hazırlanıyor...", UDim2.new(0, 10, 0, 45), Color3.new(0.8, 0.8, 0.8))
+local CurrentService = createLabel("Servis: ---", UDim2.new(0, 10, 0, 75), Color3.fromRGB(255, 165, 0))
+local CurrentObj = createLabel("Obje: Bekleniyor...", UDim2.new(0, 10, 0, 105), Color3.new(1, 1, 1), 12)
+local TotalCount = createLabel("Toplam Obje: 0", UDim2.new(0, 10, 0, 135), Color3.fromRGB(0, 255, 150))
+local MemoryLabel = createLabel("Bellek Kullanımı: %0", UDim2.new(0, 10, 0, 165), Color3.new(0.6, 0.6, 0.6), 12)
 
-local CurrentObjLabel = Instance.new("TextLabel", MainFrame)
-CurrentObjLabel.Position = UDim2.new(0, 10, 0, 70)
-CurrentObjLabel.Size = UDim2.new(1, -20, 0, 25)
-CurrentObjLabel.Text = "Obje: Bekleniyor..."
-CurrentObjLabel.TextColor3 = Color3.fromRGB(255, 255, 0) -- Sarı (Dikkat çekici)
-CurrentObjLabel.TextSize = 12
-CurrentObjLabel.TextXAlignment = Enum.TextXAlignment.Left
-CurrentObjLabel.BackgroundTransparency = 1
-
-local ProgressLabel = Instance.new("TextLabel", MainFrame)
-ProgressLabel.Position = UDim2.new(0, 10, 0, 100)
-ProgressLabel.Size = UDim2.new(1, -20, 0, 25)
-ProgressLabel.Text = "Toplam Obje: 0 | Yüzde: %0"
-ProgressLabel.TextColor3 = Color3.fromRGB(0, 255, 150)
-ProgressLabel.TextXAlignment = Enum.TextXAlignment.Left
-ProgressLabel.BackgroundTransparency = 1
-
--- İlerleme Çubuğu
-local BarBg = Instance.new("Frame", MainFrame)
-BarBg.Position = UDim2.new(0, 10, 0, 135)
-BarBg.Size = UDim2.new(1, -20, 0, 12)
-BarBg.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-local Fill = Instance.new("Frame", BarBg)
+-- İlerleme Barı
+local Bar = Instance.new("Frame", MainFrame)
+Bar.Position = UDim2.new(0, 10, 0, 205)
+Bar.Size = UDim2.new(1, -20, 0, 15)
+Bar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+local Fill = Instance.new("Frame", Bar)
 Fill.Size = UDim2.new(0, 0, 1, 0)
 Fill.BackgroundColor3 = Color3.fromRGB(0, 255, 150)
 
--- [DETAYLI SÜREÇ]
+-- [ANA SÜREÇ]
 task.spawn(function()
-    -- 1. ADIM: HAYALET TARAMA (GÖRSEL GERİ BİLDİRİMLİ)
-    StatusLabel.Text = "Durum: Harita Verisi Zorlanıyor..."
+    -- 1. ÖLÜMSÜZLÜK VE SABİTLEME
+    Status.Text = "Durum: Ölümsüzlük Aktif Ediliyor..."
     local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
     local hrp = char:WaitForChild("HumanoidRootPart")
     
+    -- Karakteri havada dondur (Anchored) böylece düşüp ölmezsin
+    hrp.Anchored = true
+    hrp.CFrame = CFrame.new(hrp.Position.X, 1500, hrp.Position.Z) -- Seni gökyüzüne çıkarır
+
+    -- 2. GHOST SCAN (HARİTA TETİKLEME)
+    Status.Text = "Durum: Harita Verisi Çekiliyor..."
     local range = 4000
-    local step = 800
-    local points = {}
+    local step = 1000
     for x = -range, range, step do
         for z = -range, range, step do
-            table.insert(points, Vector3.new(x, 1200, z))
+            local pos = Vector3.new(x, 1500, z)
+            hrp.CFrame = CFrame.new(pos)
+            LocalPlayer:RequestStreamAroundAsync(pos)
+            task.wait(0.1)
         end
     end
 
-    for i, pos in ipairs(points) do
-        StatusLabel.Text = "Durum: Tarama (" .. i .. "/" .. #points .. ")"
-        CurrentObjLabel.Text = "Konum: X:" .. math.floor(pos.X) .. " Z:" .. math.floor(pos.Z)
-        hrp.CFrame = CFrame.new(pos)
-        LocalPlayer:RequestStreamAroundAsync(pos)
-        task.wait(0.2)
-    end
-
-    -- 2. ADIM: KOPYALAMA BAŞLANGICI
-    StatusLabel.Text = "Durum: Motor Hazırlanıyor..."
+    -- 3. KOPYALAMA MOTORU
+    Status.Text = "Durum: Kopyalama Başladı!"
     local ssi_url = "https://raw.githubusercontent.com/luau/SynSaveInstance/main/saveinstance.luau"
     local synsaveinstance = loadstring(game:HttpGet(ssi_url, true))()
 
     local Options = {
         Mode = "full",
-        FilePath = "Aras_Kopya_" .. game.PlaceId .. ".rbxl",
-        Decompile = false, -- Çökmemesi için false, sonra istersen açarız.
+        FilePath = "Aras_Master_Copy.rbxl",
+        Decompile = false,
         Callback = function(data)
-            -- CANLI VERİ BURADA AKIYOR
+            -- CANLI PANEL GÜNCELLEME
             local count = data.Count or 0
             local progress = data.Progress or 0
-            local current = data.Instance and data.Instance.Name or "İşleniyor..."
+            local inst = data.Instance
             
-            ProgressLabel.Text = "Toplam Obje: " .. count .. " | Yüzde: %" .. math.floor(progress)
-            CurrentObjLabel.Text = "Şu an: " .. current
+            TotalCount.Text = "Toplam Obje: " .. count
             Fill.Size = UDim2.new(progress / 100, 0, 1, 0)
+            
+            if inst then
+                CurrentObj.Text = "Obje: " .. inst.Name
+                -- Hangi servisin kopyalandığını bul (Workspace mi, Lighting mi?)
+                local service = inst:FindFirstAncestorOfClass("DataModel") or inst.Parent
+                CurrentService.Text = "Servis: " .. tostring(service)
+            end
         end
     }
-
-    StatusLabel.Text = "Durum: DİSK'E YAZILIYOR (RBXL)..."
-    StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 0)
 
     local success, err = pcall(function()
         synsaveinstance(Options)
     end)
 
+    -- BİTİŞ
+    hrp.Anchored = false -- Sabitlemeyi kaldır
     if success then
-        StatusLabel.Text = "TAMAMLANDI! ✅"
-        StatusLabel.TextColor3 = Color3.new(0, 1, 0)
-        CurrentObjLabel.Text = "Dosya Delta klasöründe hazır."
+        Status.Text = "TAMAMLANDI! ✅"
+        Status.TextColor3 = Color3.new(0, 1, 0)
     else
-        StatusLabel.Text = "HATA OLUŞTU! ❌"
-        CurrentObjLabel.Text = "Hata detayı console'da."
+        Status.Text = "HATA! ❌"
         warn(err)
     end
 end)
