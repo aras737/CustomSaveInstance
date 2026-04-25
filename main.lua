@@ -1,55 +1,115 @@
--- Aras Ultimate SaveInstance - Eksiksiz Kopyalama
-print("==== Aras SaveInstance Başlatılıyor ====")
+-- ARAS V2: THE BEAST EDITION
+-- Repo: https://github.com/aras737/CustomSaveInstance
 
--- 1. ADIM: STREAMING BYPASS (Haritanın yarısının eksik gelmesini önler)
-local function LoadFullMap()
-    print("Harita yükleniyor... Lütfen bekleyin (Streaming Bypass)")
-    local player = game:GetService("Players").LocalPlayer
-    local char = player.Character or player.CharacterAdded:Wait()
-    local hrp = char:WaitForChild("HumanoidRootPart")
-    
-    -- Haritanın uzak köşelerini kontrol et ve yüklet
-    local scanRange = 2500 -- Menzili artırabilirsin
-    local points = {
-        Vector3.new(scanRange, 0, scanRange),
-        Vector3.new(-scanRange, 0, scanRange),
-        Vector3.new(scanRange, 0, -scanRange),
-        Vector3.new(-scanRange, 0, -scanRange),
-        Vector3.new(0, 500, 0)
-    }
+local repo = "https://raw.githubusercontent.com/aras737/CustomSaveInstance/main/"
+local HttpService = game:GetService("HttpService")
 
-    for _, pos in pairs(points) do
-        player:RequestStreamAroundAsync(pos)
-        task.wait(0.5)
-    end
-    print("Harita parçaları belleğe çekildi.")
+-- [1. HAVALI & BİLGİLENDİRİCİ GUI]
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 300, 0, 150)
+MainFrame.Position = UDim2.new(0.5, -150, 0.2, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MainFrame.BorderSizePixel = 0
+
+local corner = Instance.new("UICorner", MainFrame)
+corner.CornerRadius = UDim.new(0, 10)
+
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Text = "ARAS ULTIMATE V2"
+Title.TextColor3 = Color3.fromRGB(0, 170, 255)
+Title.TextSize = 20
+Title.Font = Enum.Font.GothamBold
+Title.BackgroundTransparency = 1
+
+local StatusLabel = Instance.new("TextLabel", MainFrame)
+StatusLabel.Position = UDim2.new(0, 10, 0, 45)
+StatusLabel.Size = UDim2.new(1, -20, 0, 30)
+StatusLabel.Text = "Sistem Bekleniyor..."
+StatusLabel.TextColor3 = Color3.new(1, 1, 1)
+StatusLabel.TextSize = 14
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local ProgressLabel = Instance.new("TextLabel", MainFrame)
+ProgressLabel.Position = UDim2.new(0, 10, 0, 75)
+ProgressLabel.Size = UDim2.new(1, -20, 0, 30)
+ProgressLabel.Text = "Obje: 0 | Yüzde: %0"
+ProgressLabel.TextColor3 = Color3.fromRGB(0, 255, 150)
+ProgressLabel.TextSize = 14
+ProgressLabel.BackgroundTransparency = 1
+ProgressLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- [3. ANTI-AFK SİSTEMİ]
+local function StartAntiAfk()
+    local vu = game:GetService("VirtualUser")
+    game.Players.LocalPlayer.Idled:Connect(function()
+        vu:CaptureController()
+        vu:ClickButton2(Vector2.new())
+        StatusLabel.Text = "Status: Anti-AFK Tetiklendi!"
+    end)
+    print("✅ Anti-AFK Aktif")
 end
 
--- 2. ADIM: KAYDETME MOTORUNU ÇEK VE AYARLA
-local function StartSave()
-    local Params = {
-        RepoURL = "https://raw.githubusercontent.com/luau/SynSaveInstance/main/",
-        SSI = "saveinstance",
-    }
+-- [4. REMOTE EVENT LOGGER]
+local function StartRemoteLog()
+    local remotes = {}
+    for _, v in pairs(game:GetDescendants()) do
+        if v:IsA("RemoteEvent") or v:IsA("RemoteFunction") then
+            table.insert(remotes, {Name = v.Name, Path = v:GetFullName(), Class = v.ClassName})
+        end
+    end
+    if writefile then
+        writefile("Aras_Remotes_" .. game.PlaceId .. ".json", HttpService:JSONEncode(remotes))
+        print("✅ Remote'lar Kaydedildi")
+    end
+end
 
-    local synsaveinstance = loadstring(game:HttpGet(Params.RepoURL .. Params.SSI .. ".luau", true), Params.SSI)()
+-- [2. SMART DECOMPILE & ANA MOTOR]
+local function StartCopy()
+    StatusLabel.Text = "Status: Harita Yükleniyor (Streaming Bypass)..."
+    StartAntiAfk()
+    StartRemoteLog()
+    
+    -- Streaming Bypass modülünü çağır
+    pcall(function()
+        loadstring(game:HttpGet(repo .. "modules/StreamingBypass.lua"))().LoadMap()
+    end)
+
+    StatusLabel.Text = "Status: Kopyalama Başladı..."
+    
+    local ssi_url = "https://raw.githubusercontent.com/luau/SynSaveInstance/main/saveinstance.luau"
+    local synsaveinstance = loadstring(game:HttpGet(ssi_url, true))()
 
     local Options = {
-        Mode = "full",                 -- Her şeyi kopyala
-        Decompile = true,              -- Scriptleri çöz
-        NilInstances = true,           -- Gizli objeleri bul
-        RemovePlayerCharacters = true, -- Oyuncuları temizle (kalabalık yapmasın)
-        SaveTerrain = true,            -- Toprağı/Suyu kaçırma
-        IgnoreSlowInstances = false,   -- Yavaş yüklenenleri bekle (Eksiksiz olması için)
-        FilePath = "Aras_Oyun_Kopyasi.rbxl" -- Dosya adı
+        Mode = "full",
+        FilePath = "Aras_TheBeast_" .. game.PlaceId .. ".rbxl",
+        -- SMART DECOMPILE AYARI:
+        Decompile = true, 
+        DecompileIgnore = {"Chat", "ControlScript", "RbxCharacterSounds"}, -- Gereksizleri atla, çökmeyi engelle
+        DecompileTimeout = 15,
+        
+        NilInstances = true,
+        SaveTerrain = true,
+        Callback = function(data)
+            -- GUI GÜNCELLEME
+            ProgressLabel.Text = "Obje: " .. (data.Count or 0) .. " | İşlem: " .. (data.Status or "Bekliyor")
+        end
     }
 
-    print("Kopyalama başladı... Dosya .rbxl olarak kaydedilecek.")
-    synsaveinstance(Options)
-    print("İŞLEM TAMAM! Executor klasöründeki 'workspace' içine bak kanka.")
+    local success, err = pcall(function()
+        synsaveinstance(Options)
+    end)
+
+    if success then
+        StatusLabel.Text = "Status: TAMAMLANDI!"
+        StatusLabel.TextColor3 = Color3.new(0, 1, 0)
+    else
+        StatusLabel.Text = "HATA: " .. tostring(err)
+        StatusLabel.TextColor3 = Color3.new(1, 0, 0)
+    end
 end
 
--- ÇALIŞTIR
-LoadFullMap()
-task.wait(1)
-StartSave()
+-- BAŞLAT
+task.spawn(StartCopy)
