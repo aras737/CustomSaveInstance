@@ -1,33 +1,41 @@
 local TeleportBypass = {}
 
-function TeleportBypass.ScanFullMap(range, step)
+function TeleportBypass.ScanFullMap()
     local player = game:GetService("Players").LocalPlayer
-    local char = player.Character or player.CharacterAdded:Wait()
-    local hrp = char:WaitForChild("HumanoidRootPart")
-    local oldPos = hrp.CFrame
+    local camera = workspace.CurrentCamera
+    
+    -- Harita büyüklüğüne göre menzil (Artırabilirsin)
+    local range = 4000 
+    local step = 300 -- Daha sık tarama yaparak her objeyi tetikler
+    
+    print("🛰️ Görünmez Kamera Taraması Başladı (Kick Riskini Azaltır)...")
 
-    range = range or 2500 -- Ne kadar uzağa gitsin?
-    step = step or 500    -- Kaç metre aralıkla ışınlansın?
-
-    print("🛰️ Teleport Bypass Başlatıldı...")
-
-    -- Haritayı ızgara şeklinde gez (Grid Scan)
     for x = -range, range, step do
         for z = -range, range, step do
-            -- Karakteri ışınla (Yüksekte tut ki yere düşmesin/ölmesin)
-            hrp.CFrame = CFrame.new(Vector3.new(x, 500, z))
+            -- Karakteri değil, sadece oyunun odak noktasını (Focus) değiştiriyoruz
+            -- Bu sayede oyun o bölgedeki objeleri cihazına gönderir
+            player.ReplicationFocus = nil -- Reset
             
-            -- Oyunun veriyi göndermesi için kısa bir süre bekle
-            game:GetService("RunService").Heartbeat:Wait()
-            player:RequestStreamAroundAsync(Vector3.new(x, 0, z))
+            -- Geçici bir parça oluşturup odağı oraya veriyoruz
+            local focusPart = Instance.new("Part")
+            focusPart.Anchored = true
+            focusPart.Transparency = 1
+            focusPart.CanCollide = false
+            focusPart.CFrame = CFrame.new(x, 100, z)
+            focusPart.Parent = workspace
             
-            task.wait(0.1) -- Delta'nın çökmemesi için kısa es
+            player.ReplicationFocus = focusPart
+            
+            -- Oyunun yüklemesi için kısa bekleme
+            task.wait(0.2) 
+            
+            focusPart:Destroy()
         end
+        task.wait(0.1) -- Delta'yı yormamak için
     end
-
-    -- Karakteri eski yerine geri getir
-    hrp.CFrame = oldPos
-    print("✅ Tüm harita tarandı ve yüklendi!")
+    
+    player.ReplicationFocus = nil
+    print("✅ Tüm objeler belleğe çekildi, artık kopyalanabilir!")
 end
 
 return TeleportBypass
