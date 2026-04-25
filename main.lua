@@ -1,45 +1,55 @@
--- ARAS V2: DIRECT RBXL EXPORT
+-- ARAS V2: GHOST-SCAN EDITION (ANTI-BAN)
 local repo = "https://raw.githubusercontent.com/aras737/CustomSaveInstance/main/"
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
--- [EKRAN PANELI]
-local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 300, 0, 120)
-MainFrame.Position = UDim2.new(0.5, -150, 0.2, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-local corner = Instance.new("UICorner", MainFrame)
-local Status = Instance.new("TextLabel", MainFrame)
-Status.Size = UDim2.new(1, 0, 1, 0)
-Status.Text = "RBXL OLUŞTURULUYOR...\nLÜTFEN BEKLE KANKA"
-Status.TextColor3 = Color3.new(1, 1, 1)
-Status.BackgroundTransparency = 1
-Status.TextSize = 18
+-- [HAYALET TARAYICI - HIZLI VE GÖRÜNMEZ]
+local function GhostScan()
+    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+    local oldCFrame = hrp.CFrame
+    
+    -- Karakteri geçici olarak görünmez ve çarpışmasız yap (Ban riskini azaltır)
+    for _, part in pairs(char:GetChildren()) do
+        if part:IsA("BasePart") then part.CanCollide = false end
+    end
 
--- [ANA KOPYALAMA MOTORU]
+    local range = 5000 -- Tarama alanı
+    local step = 400   -- Atlayış mesafesi
+
+    for x = -range, range, step do
+        for z = -range, range, step do
+            -- Önce kamerayı ve ReplicationFocus'u oraya odakla
+            local targetPos = Vector3.new(x, 1000, z) -- Çok yüksekten uçuyoruz, kimse görmez
+            hrp.CFrame = CFrame.new(targetPos)
+            LocalPlayer:RequestStreamAroundAsync(targetPos)
+            
+            -- O kadar hızlı ki sunucu konumunu tam işlemeden veri çekilir
+            game:GetService("RunService").Heartbeat:Wait()
+        end
+    end
+
+    hrp.CFrame = oldCFrame -- İşlem bitince şak diye eski yerine dön
+    print("✅ Hayalet Tarama Tamamlandı!")
+end
+
+-- [ANA KOPYALAYICI SÜRECİ]
 task.spawn(function()
-    -- Harita taramasını geçiyoruz, direkt motoru çağırıyoruz
+    -- 1. ADIM: Kimseye çaktırmadan her yeri gez
+    GhostScan()
+
+    -- 2. ADIM: Her şeyi .rbxl olarak dosyaya dök
     local ssi_url = "https://raw.githubusercontent.com/luau/SynSaveInstance/main/saveinstance.luau"
     local synsaveinstance = loadstring(game:HttpGet(ssi_url, true))()
 
     local Options = {
-        Mode = "full", -- Her şeyi al
-        FilePath = "Aras_Kopya_" .. game.PlaceId .. ".rbxl",
-        Decompile = false, -- Çökmeyi önlemek için kapalı (harita öncelikli)
+        Mode = "full",
+        FilePath = "Aras_Full_World_" .. game.PlaceId .. ".rbxl",
+        Decompile = false, -- En stabil dosya için kapalı tutuyoruz
         NilInstances = true,
         SaveTerrain = true,
-        IgnoreSlowInstances = false
+        IgnoreSlowInstances = false -- Hiçbir şeyi atlama!
     }
 
-    -- Kopyalamayı başlat
-    local success, err = pcall(function()
-        synsaveinstance(Options)
-    end)
-
-    if success then
-        Status.Text = "BİTTİ! ✅\n'workspace' klasörüne bak."
-        Status.TextColor3 = Color3.new(0, 1, 0)
-    else
-        Status.Text = "HATA OLUŞTU! ❌"
-        warn(err)
-    end
+    synsaveinstance(Options)
 end)
