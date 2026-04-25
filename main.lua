@@ -1,10 +1,10 @@
--- ARAS V2: ALL-IN-ONE FIX
+-- ARAS V2: FORCE START EDITION
 local repo = "https://raw.githubusercontent.com/aras737/CustomSaveInstance/main/"
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- [GUI OLUŞTURMA - BURASI AYNI]
+-- [GUI OLUŞTURMA]
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 320, 0, 160)
@@ -28,72 +28,62 @@ Title.BackgroundTransparency = 1
 local StatusLabel = Instance.new("TextLabel", MainFrame)
 StatusLabel.Position = UDim2.new(0, 15, 0, 50)
 StatusLabel.Size = UDim2.new(1, -30, 0, 25)
-StatusLabel.Text = "Durum: Başlatılıyor..."
+StatusLabel.Text = "Durum: Hazırlanıyor..."
 StatusLabel.TextColor3 = Color3.new(0.8, 0.8, 0.8)
 StatusLabel.TextSize = 14
 StatusLabel.Font = Enum.Font.Gotham
 StatusLabel.BackgroundTransparency = 1
-StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
 local ProgressLabel = Instance.new("TextLabel", MainFrame)
 ProgressLabel.Position = UDim2.new(0, 15, 0, 80)
 ProgressLabel.Size = UDim2.new(1, -30, 0, 25)
-ProgressLabel.Text = "Obje: 0 | Hazır: %0"
+ProgressLabel.Text = "Obje: 0 | Durum: Bekliyor"
 ProgressLabel.TextColor3 = Color3.fromRGB(0, 255, 150)
 ProgressLabel.TextSize = 14
-ProgressLabel.Font = Enum.Font.GothamSemibold
 ProgressLabel.BackgroundTransparency = 1
-ProgressLabel.TextXAlignment = Enum.TextXAlignment.Left
-
--- [TELEPORT BYPASS - İÇERİ GÖMDÜK]
-local function ScanMap()
-    StatusLabel.Text = "Durum: Harita Taranıyor (Görünmez)..."
-    local range = 3000 -- Menzili Delta için biraz düşürdük (daha stabil)
-    local step = 600
-    
-    for x = -range, range, step do
-        for z = -range, range, step do
-            local focus = Instance.new("Part")
-            focus.Anchored = true
-            focus.Transparency = 1
-            focus.Position = Vector3.new(x, 100, z)
-            focus.Parent = workspace
-            LocalPlayer.ReplicationFocus = focus
-            task.wait(0.1) -- Hızlandırdık
-            focus:Destroy()
-        end
-    end
-    LocalPlayer.ReplicationFocus = nil
-end
 
 -- [ANA SÜREÇ]
 task.spawn(function()
-    -- Haritayı tara
-    ScanMap()
-    
-    StatusLabel.Text = "Durum: Motor Yükleniyor..."
+    -- 1. ADIM: Arka Planda Harita Tetikleme (Takılmayı engellemek için spawn içinde)
+    task.spawn(function()
+        StatusLabel.Text = "Durum: Harita Tetikleniyor..."
+        local range = 2000
+        for x = -range, range, 1000 do
+            for z = -range, range, 1000 do
+                LocalPlayer:RequestStreamAroundAsync(Vector3.new(x, 0, z))
+                task.wait(0.1)
+            end
+        end
+    end)
+
+    task.wait(1) -- Kısa bir es ver ve hemen kopyalamaya geç
+
+    -- 2. ADIM: Motoru Yükle
+    StatusLabel.Text = "Durum: Motor Bağlanıyor..."
     local ssi_url = "https://raw.githubusercontent.com/luau/SynSaveInstance/main/saveinstance.luau"
     local success_ssi, synsaveinstance = pcall(function()
         return loadstring(game:HttpGet(ssi_url, true))()
     end)
 
     if not success_ssi then
-        StatusLabel.Text = "Hata: Motor çekilemedi!"
+        StatusLabel.Text = "Hata: Motor Yüklenemedi!"
         return
     end
+
+    -- 3. ADIM: Kopyalamayı Zorla Başlat
+    StatusLabel.Text = "Durum: KOPYALAMA BAŞLADI!"
+    StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
 
     local Options = {
         Mode = "full",
         FilePath = "Aras_Kopya_" .. game.PlaceId .. ".rbxl",
-        Decompile = true,
+        Decompile = false, -- Delta'da takılmaması için önce false yap, stabil çalışırsa true denersin
         NilInstances = true,
         SaveTerrain = true,
-        IgnoreSlowInstances = false,
         Callback = function(data)
-            ProgressLabel.Text = "Obje: " .. (data.Count or 0) .. " | Durum: " .. (data.Status or "İşleniyor")
+            ProgressLabel.Text = "Obje: " .. (data.Count or 0) .. " | Yüzde: %" .. (data.Progress or 0)
         end
     }
 
-    StatusLabel.Text = "Durum: KOPYALANIYOR..."
     local success, err = pcall(function()
         synsaveinstance(Options)
     end)
@@ -101,7 +91,10 @@ task.spawn(function()
     if success then
         StatusLabel.Text = "Durum: TAMAMLANDI!"
         StatusLabel.TextColor3 = Color3.new(0, 1, 0)
+        ProgressLabel.Text = "Dosya 'workspace' klasöründe!"
     else
         StatusLabel.Text = "Hata: " .. tostring(err)
+        StatusLabel.TextColor3 = Color3.new(1, 0, 0)
+        warn(err)
     end
 end)
