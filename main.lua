@@ -1,117 +1,104 @@
--- [[ ARAS V11: THE GOD-MODE UNIVERSAL SAVER ]]
--- Map kopyalama + Script Decompile (En İyi Sürüm)
+-- [[ ARAS V12: THE OVERLORD - DEEP SCAN ENGINE ]]
+-- Her şeyi yükler, gizli saklı bırakmaz.
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local Workspace = game:GetService("Workspace")
 
--- [DEX STYLE MASTER UI]
+-- [DEX STYLE ULTIMATE UI]
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 450, 0, 400)
-MainFrame.Position = UDim2.new(0.5, -225, 0.1, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 12)
+MainFrame.Size = UDim2.new(0, 480, 0, 420)
+MainFrame.Position = UDim2.new(0.5, -240, 0.1, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 15)
 
--- Neon Kenarlık
 local Stroke = Instance.new("UIStroke", MainFrame)
-Stroke.Color = Color3.fromRGB(0, 255, 127)
+Stroke.Color = Color3.fromRGB(255, 0, 0) -- Agresif Kırmızı
 Stroke.Thickness = 2
-Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
--- Başlık
 local Title = Instance.new("TextLabel", MainFrame)
-Title.Size = UDim2.new(1, 0, 0, 40)
-Title.Text = "  ARAS V11 - SUPREME COPY ENGINE"
+Title.Size = UDim2.new(1, 0, 0, 45)
+Title.Text = "  ARAS V12 - DEEP SCAN OVERLORD"
 Title.TextColor3 = Color3.new(1, 1, 1)
-Title.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+Title.BackgroundColor3 = Color3.fromRGB(15, 0, 0)
 Title.Font = Enum.Font.Code
-Title.TextSize = 18
+Title.TextSize = 20
 Title.TextXAlignment = Enum.TextXAlignment.Left
 
--- Log Paneli (Dex Style)
 local Scroll = Instance.new("ScrollingFrame", MainFrame)
-Scroll.Size = UDim2.new(1, -20, 1, -140)
-Scroll.Position = UDim2.new(0, 10, 0, 50)
-Scroll.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
-Scroll.CanvasSize = UDim2.new(0, 0, 50, 0)
-Scroll.ScrollBarThickness = 2
+Scroll.Size = UDim2.new(1, -20, 1, -160)
+Scroll.Position = UDim2.new(0, 10, 0, 55)
+Scroll.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+Scroll.CanvasSize = UDim2.new(0, 0, 100, 0)
+Scroll.ScrollBarThickness = 3
 
 local UIList = Instance.new("UIListLayout", Scroll)
 UIList.Padding = UDim.new(0, 2)
 
--- Alt Göstergeler
-local Footer = Instance.new("Frame", MainFrame)
-Footer.Size = UDim2.new(1, -20, 0, 70)
-Footer.Position = UDim2.new(0, 10, 1, -80)
-Footer.BackgroundTransparency = 1
-
-local Status = Instance.new("TextLabel", Footer)
-Status.Size = UDim2.new(1, 0, 0, 25)
-Status.Text = "SİSTEM: Motor Bekleniyor..."
-Status.TextColor3 = Color3.fromRGB(0, 255, 127)
+local Status = Instance.new("TextLabel", MainFrame)
+Status.Position = UDim2.new(0, 15, 1, -100)
+Status.Size = UDim2.new(1, -30, 0, 30)
+Status.Text = "SİSTEM: Bekleniyor..."
+Status.TextColor3 = Color3.fromRGB(255, 255, 0)
 Status.BackgroundTransparency = 1
 Status.Font = Enum.Font.Code
 
-local ProgressLabel = Instance.new("TextLabel", Footer)
-ProgressLabel.Position = UDim2.new(0, 0, 0, 25)
-ProgressLabel.Size = UDim2.new(1, 0, 0, 20)
-ProgressLabel.Text = "OBJE: 0 | SCRIPT: 0"
-ProgressLabel.TextColor3 = Color3.new(1, 1, 1)
-ProgressLabel.BackgroundTransparency = 1
-
--- [MOTORU ÇALIŞTIR]
+-- [ANA MOTOR]
 task.spawn(function()
-    -- 1. Karakter Güvenliği
-    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    local hrp = char:WaitForChild("HumanoidRootPart")
-    hrp.Anchored = true
-    hrp.CFrame = CFrame.new(0, 5000, 0)
-
-    Status.Text = "SİSTEM: Decompiler Motoru Yükleniyor..."
+    -- 1. STREAMING ENABLED BYPASS (Haritayı Zorla Yükleme)
+    Status.Text = "MOD: Harita Parçaları Zorla Yükleniyor (Streaming Bypass)..."
+    local mapParts = Workspace:GetDescendants()
+    for i, v in ipairs(mapParts) do
+        if v:IsA("BasePart") then
+            -- Kamerayı kısa süreliğine oraya odaklanmış gibi kandırır
+            LocalPlayer.ReplicationFocus = v
+            if i % 100 == 0 then task.wait() end -- Crash engelleme
+        end
+    end
     
-    -- En Güncel SaveInstance Kütüphanesi
+    Status.Text = "MOD: Decompiler & SaveInstance Yükleniyor..."
     local saveinstance = loadstring(game:HttpGet("https://raw.githubusercontent.com/luau/SynSaveInstance/main/saveinstance.luau", true))()
 
-    -- [EN İYİ AYARLAR]
+    -- [EN DERİN KOPYALAMA AYARLARI]
     local options = {
-        Mode = "full", -- Her şeyi al
-        FilePath = "Aras_Supreme_Copy.rbxl",
-        NilInstances = true, -- Gizli objeleri yakala
-        SaveTerrain = true,  -- Haritadaki Terrain'i (dağ, taş) al
-        Decompile = true,    -- SCRIPTLERİ KOPYALA (Kritik özellik!)
-        DecompileTimeout = 10, -- Script başına 10 saniye tanı
-        RemovePlayerCharacters = true, -- Oyuncuları sil (Temiz harita)
-        IgnoreSlowInstances = false,   -- Hiçbir şeyi atlama
+        Mode = "full", 
+        FilePath = "Aras_Full_World.rbxl",
+        NilInstances = true,    -- Parent'ı olmayan (gizli) objeleri al
+        SaveTerrain = true,     -- Su, kum, dağ verilerini al
+        Decompile = true,       -- Scriptleri (Local/Module) çöz ve kopyala
+        DecompileTimeout = 15,  -- Karmaşık scriptler için daha fazla süre
+        IgnoreSlowInstances = false, 
+        ObjectBlacklist = {},   -- Hiçbir şeyi engelleme
         Callback = function(data)
             if data.Instance then
                 local l = Instance.new("TextLabel", Scroll)
                 l.Size = UDim2.new(1, 0, 0, 16)
                 l.BackgroundTransparency = 1
-                l.TextColor3 = Color3.fromRGB(200, 200, 200)
-                l.Text = " > " .. data.Instance.Name .. " [" .. data.Instance.ClassName .. "]"
+                l.TextColor3 = Color3.fromRGB(255, 255, 255)
+                l.Text = " [+] " .. data.Instance:GetFullName()
                 l.Font = Enum.Font.Code
                 l.TextSize = 10
                 l.TextXAlignment = Enum.TextXAlignment.Left
-                Scroll.CanvasPosition = Vector2.new(0, 99999)
+                Scroll.CanvasPosition = Vector2.new(0, 999999)
             end
-            ProgressLabel.Text = "OBJE: " .. (data.Count or 0) .. " | İLERLEME: %" .. math.floor(data.Progress or 0)
+            Status.Text = "KOPYALANAN: " .. (data.Count or 0) .. " | İLERLEME: %" .. math.floor(data.Progress or 0)
         end
     }
 
-    Status.Text = "SİSTEM: KOPYALAMA VE DECOMPILE BAŞLADI!"
-    
+    Status.Text = "SİSTEM: DERİN TARAMA BAŞLADI - TELEFONU ELLEME!"
+    Status.TextColor3 = Color3.fromRGB(0, 255, 0)
+
     local success, err = pcall(function()
         saveinstance(options)
     end)
 
-    hrp.Anchored = false
     if success then
-        Status.Text = "SİSTEM: TAMAMLANDI! ✅"
+        Status.Text = "İŞLEM TAMAMLANDI! Dosya: workspace/Aras_Full_World.rbxl"
     else
-        Status.Text = "HATA: " .. tostring(err)
-        warn("Hata Detayı: " .. err)
+        Status.Text = "KRİTİK HATA: " .. tostring(err)
     end
 end)
