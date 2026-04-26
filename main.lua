@@ -1,114 +1,117 @@
--- ARAS V7: REAL-TIME DEX TREE & FULL SAVER
+-- [[ ARAS V11: THE GOD-MODE UNIVERSAL SAVER ]]
+-- Map kopyalama + Script Decompile (En İyi Sürüm)
+
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- [DEX TREE VIEW PANEL]
+-- [DEX STYLE MASTER UI]
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 450, 0, 380)
-MainFrame.Position = UDim2.new(0.5, -225, 0.15, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.Size = UDim2.new(0, 450, 0, 400)
+MainFrame.Position = UDim2.new(0.5, -225, 0.1, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 12)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
+
+-- Neon Kenarlık
 local Stroke = Instance.new("UIStroke", MainFrame)
-Stroke.Color = Color3.fromRGB(60, 60, 70)
+Stroke.Color = Color3.fromRGB(0, 255, 127)
 Stroke.Thickness = 2
+Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
 -- Başlık
 local Title = Instance.new("TextLabel", MainFrame)
-Title.Size = UDim2.new(1, 0, 0, 35)
-Title.Text = "  DEX EXPLORER & MAP SAVER"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.Font = Enum.Font.SourceSansBold
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Text = "  ARAS V11 - SUPREME COPY ENGINE"
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+Title.Font = Enum.Font.Code
 Title.TextSize = 18
+Title.TextXAlignment = Enum.TextXAlignment.Left
 
--- Kaydırma Alanı (Dex'in ağaç yapısı için)
+-- Log Paneli (Dex Style)
 local Scroll = Instance.new("ScrollingFrame", MainFrame)
-Scroll.Size = UDim2.new(1, -20, 1, -120)
-Scroll.Position = UDim2.new(0, 10, 0, 45)
-Scroll.CanvasSize = UDim2.new(0, 0, 10, 0)
-Scroll.ScrollBarThickness = 4
-Scroll.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Scroll.Size = UDim2.new(1, -20, 1, -140)
+Scroll.Position = UDim2.new(0, 10, 0, 50)
+Scroll.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+Scroll.CanvasSize = UDim2.new(0, 0, 50, 0)
+Scroll.ScrollBarThickness = 2
 
 local UIList = Instance.new("UIListLayout", Scroll)
 UIList.Padding = UDim.new(0, 2)
 
--- Alt Bilgi Paneli
-local InfoFrame = Instance.new("Frame", MainFrame)
-InfoFrame.Size = UDim2.new(1, -20, 0, 60)
-InfoFrame.Position = UDim2.new(0, 10, 1, -70)
-InfoFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+-- Alt Göstergeler
+local Footer = Instance.new("Frame", MainFrame)
+Footer.Size = UDim2.new(1, -20, 0, 70)
+Footer.Position = UDim2.new(0, 10, 1, -80)
+Footer.BackgroundTransparency = 1
 
-local Status = Instance.new("TextLabel", InfoFrame)
-Status.Size = UDim2.new(1, 0, 0, 30)
-Status.Text = "DURUM: Hazırlanıyor..."
-Status.TextColor3 = Color3.fromRGB(0, 255, 0)
+local Status = Instance.new("TextLabel", Footer)
+Status.Size = UDim2.new(1, 0, 0, 25)
+Status.Text = "SİSTEM: Motor Bekleniyor..."
+Status.TextColor3 = Color3.fromRGB(0, 255, 127)
 Status.BackgroundTransparency = 1
 Status.Font = Enum.Font.Code
 
-local Counter = Instance.new("TextLabel", InfoFrame)
-Counter.Position = UDim2.new(0, 0, 0, 30)
-Counter.Size = UDim2.new(1, 0, 0, 30)
-Counter.Text = "TOPLAM OBJE: 0"
-Counter.TextColor3 = Color3.fromRGB(255, 255, 255)
-Counter.BackgroundTransparency = 1
+local ProgressLabel = Instance.new("TextLabel", Footer)
+ProgressLabel.Position = UDim2.new(0, 0, 0, 25)
+ProgressLabel.Size = UDim2.new(1, 0, 0, 20)
+ProgressLabel.Text = "OBJE: 0 | SCRIPT: 0"
+ProgressLabel.TextColor3 = Color3.new(1, 1, 1)
+ProgressLabel.BackgroundTransparency = 1
 
--- [KOPYALAMA VE LİSTELEME FONKSİYONU]
-local function updateTree(inst)
-    local label = Instance.new("TextLabel", Scroll)
-    label.Size = UDim2.new(1, 0, 0, 18)
-    label.BackgroundTransparency = 1
-    label.TextColor3 = Color3.fromRGB(200, 200, 200)
-    label.TextSize = 13
-    label.Font = Enum.Font.Code
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    
-    -- Dex stili ağaç gösterimi
-    local depth = #inst:GetFullName():split(".")
-    label.Text = string.rep("  ", depth) .. "📂 " .. inst.Name .. " [" .. inst.ClassName .. "]"
-    
-    -- Kaydırmayı otomatik aşağı çek
-    Scroll.CanvasPosition = Vector2.new(0, Scroll.AbsoluteWindowSize.Y)
-end
-
+-- [MOTORU ÇALIŞTIR]
 task.spawn(function()
-    -- Karakteri güvenliğe al
+    -- 1. Karakter Güvenliği
     local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
     local hrp = char:WaitForChild("HumanoidRootPart")
     hrp.Anchored = true
-    hrp.CFrame = CFrame.new(hrp.Position.X, 3000, hrp.Position.Z)
+    hrp.CFrame = CFrame.new(0, 5000, 0)
 
-    -- Motoru yükle
+    Status.Text = "SİSTEM: Decompiler Motoru Yükleniyor..."
+    
+    -- En Güncel SaveInstance Kütüphanesi
     local saveinstance = loadstring(game:HttpGet("https://raw.githubusercontent.com/luau/SynSaveInstance/main/saveinstance.luau", true))()
 
-    local Options = {
-        Mode = "full",
-        FilePath = "Aras_Full_Dex_Map.rbxl",
-        NilInstances = true,
-        SaveTerrain = true,
-        Decompile = false,
+    -- [EN İYİ AYARLAR]
+    local options = {
+        Mode = "full", -- Her şeyi al
+        FilePath = "Aras_Supreme_Copy.rbxl",
+        NilInstances = true, -- Gizli objeleri yakala
+        SaveTerrain = true,  -- Haritadaki Terrain'i (dağ, taş) al
+        Decompile = true,    -- SCRIPTLERİ KOPYALA (Kritik özellik!)
+        DecompileTimeout = 10, -- Script başına 10 saniye tanı
+        RemovePlayerCharacters = true, -- Oyuncuları sil (Temiz harita)
+        IgnoreSlowInstances = false,   -- Hiçbir şeyi atlama
         Callback = function(data)
-            local inst = data.Instance
-            if inst then
-                updateTree(inst) -- Dex ağacına ekle
-                Status.Text = "DURUM: Kopyalanıyor..."
+            if data.Instance then
+                local l = Instance.new("TextLabel", Scroll)
+                l.Size = UDim2.new(1, 0, 0, 16)
+                l.BackgroundTransparency = 1
+                l.TextColor3 = Color3.fromRGB(200, 200, 200)
+                l.Text = " > " .. data.Instance.Name .. " [" .. data.Instance.ClassName .. "]"
+                l.Font = Enum.Font.Code
+                l.TextSize = 10
+                l.TextXAlignment = Enum.TextXAlignment.Left
+                Scroll.CanvasPosition = Vector2.new(0, 99999)
             end
-            Counter.Text = "TOPLAM OBJE: " .. (data.Count or 0)
+            ProgressLabel.Text = "OBJE: " .. (data.Count or 0) .. " | İLERLEME: %" .. math.floor(data.Progress or 0)
         end
     }
 
+    Status.Text = "SİSTEM: KOPYALAMA VE DECOMPILE BAŞLADI!"
+    
     local success, err = pcall(function()
-        saveinstance(Options)
+        saveinstance(options)
     end)
 
     hrp.Anchored = false
     if success then
-        Status.Text = "DURUM: BİTTİ! ✅"
+        Status.Text = "SİSTEM: TAMAMLANDI! ✅"
     else
         Status.Text = "HATA: " .. tostring(err)
+        warn("Hata Detayı: " .. err)
     end
 end)
